@@ -6,7 +6,8 @@ function xdot = f(x,t)
   h0 = 10^9;
   p = 0.4; # Population Density of Ho
   k1 = 0.4;
-  k2 = awgn(0.4,snr,'measured');
+#k2 = awgn(0.4,snr,'measured');
+  k2 = 0.4;
   k3 = 6.1;
   k4 = 0.2;
   kg = 0.5;
@@ -53,19 +54,21 @@ mycolors = [
    [0.000000 0.000000 0.750000]; # Carolina Blue
    [0.750000 0.000000 0.250000]  # Purple
 ];
-hostcolor =  [0.00 0.00 1.00];
-host2color = [0.75 0.00 0.00];
-host3color = [0.00 0.75 0.00];
-phagecolor = [0.75 0.25 1.00];
+hostcolor =  [0.00 0.00 1.00];  % Blue Devil Blue
+host2color = [0.00 0.75 0.00];  % Green
+host3color = [0.75 0.00 0.00];  % Red
+phagecolor = [0.75 0.00 0.75];  % Purple
+zcolor =     [0.00 0.25 0.75];  % Carolina Blue
 
-# Initial conditions x(1)=1 and x(2)=2 on [0,50] with 200 points:
+# Initial conditions x(1)=1000 and x(2..5)=0 on [0,20] with 200 points:
 
-x = lsode("f", [1;0;0;0;0], (t = linspace (0,20,200)' ));
+x = lsode("f", [1000;0;0;0;0], (t = linspace (0,20,200)' ));
 plot(t,x);
-text(10,4*x(10)/2,'Uninfected Host','fontsize',22,'color',hostcolor);
-text(10,x(10),'Productive Host','fontsize',28,'color',host3color);
-text(10,x(10)-x(10)/2,'Adsorbed Host','fontsize',24,'color',host2color);
-fprintf("%f:%f:%f\n",mycolors(1));
-text(10,8*x(10)/3,'Phage','fontsize',32,'color',phagecolor);
+o = x(120,1)*0.05;
+text(12,x(120,1)+o,'Uninfected Host','fontsize',22,'color',hostcolor);
+text(12,x(120,2)+o,'Adsorbed Host','fontsize',24,'color',host2color);
+text(12,x(120,3)+o,'Productive Host','fontsize',28,'color',host3color);
+text(12,x(120,4)+o,'Z','fontsize',28,'color',zcolor);
+text(12,x(120,5)+o,'Phage','fontsize',32,'color',phagecolor);
 
 
