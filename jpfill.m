@@ -1,6 +1,6 @@
-function[fillhandle,msg]=jbfill(xpoints,upper,lower,roi,color,edge,add,transparency) 
+function[fillhandle,msg]=jpfill(xpoints,upper,lower,roi,color,edge,add,transparency) 
 %% ADAPTED BY K. OLFERS 28-08-2016
-%USAGE: [fillhandle,msg]=jbfill(xpoints,upper,lower,color,edge,add,transparency) 
+%USAGE: [fillhandle,msg]=jpfill(xpoints,upper,lower,color,edge,add,transparency) 
 %This function will fill a region with a color between the two vectors provided 
 %using the Matlab fill command. 
 % 
@@ -21,7 +21,7 @@ function[fillhandle,msg]=jbfill(xpoints,upper,lower,roi,color,edge,add,transpare
 % a=rand(1,20);%Vector of random data 
 % b=a+2*rand(1,20);%2nd vector of data points; 
 % x=1:20;%horizontal vector 
-% [ph,msg]=jbfill(x,a,b,rand(1,3),rand(1,3),0,rand(1,1)) 
+% [ph,msg]=jpfill(x,a,b,rand(1,3),rand(1,3),0,rand(1,1)) 
 % grid on 
 % legend('Datr') 
 if nargin<8;transparency=1;end %default is to have a transparency of .5 
