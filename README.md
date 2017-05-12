@@ -1,11 +1,17 @@
 # phagepop
 
 On Linux, I needed to add the following to my ~/.octaverc file to load image and make plot lines thick enough to see.
+
 ------------begin ~/.octaverc
+
 pkg load image;
-set(0, "defaultaxeslinewidth", 1.0); 
+
+set(0, "defaultaxeslinewidth", 1.0);
+
 set(0, "defaultlinelinewidth", 1.0);
+
 ------------end ~/.octaverc
+
 
 
 Phagestat population dynamic model for EvoStat:
