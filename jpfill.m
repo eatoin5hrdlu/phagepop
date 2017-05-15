@@ -1,4 +1,4 @@
-function[fillhandle,msg]=jpfill(xpoints,upper,lower,roi,color,edge,add,transparency) 
+function[fillhandle,msg]=jpfill(xpoints,upper,lower,color,roi,edge,add,transparency) 
 %% ADAPTED BY K. OLFERS 28-08-2016
 %USAGE: [fillhandle,msg]=jpfill(xpoints,upper,lower,color,edge,add,transparency) 
 %This function will fill a region with a color between the two vectors provided 
@@ -27,8 +27,8 @@ function[fillhandle,msg]=jpfill(xpoints,upper,lower,roi,color,edge,add,transpare
 if nargin<8;transparency=1;end %default is to have a transparency of .5 
 if nargin<7;add=1;end %default is to add to current plot 
 if nargin<6;edge='k';end %dfault edge color is black 
-if nargin<5;color='b';end %default color is blue 
-if nargin<4; roi = ones(length(xpoints),1); end 
+if nargin<5; roi = ones(length(xpoints),1); end 
+if nargin<4;color='b';end %default color is blue 
 if ~isrow(lower); lower = lower'; end 
 if ~isrow(upper); upper = upper'; end 
 if ~isrow(xpoints); xpoints = xpoints'; end 
@@ -55,9 +55,6 @@ hold on
 end 
 fillhandle=fill(tmpXpoints,filled,color);%plot the data 
 set(fillhandle,'EdgeColor',edge,'FaceAlpha',transparency,'EdgeAlpha',transparency);%set edge color 
-if add 
-hold off 
-end 
 else 
 msg='Error: Must use the same number of points in each vector'; 
 end
