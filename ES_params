@@ -1,0 +1,18 @@
+# Created by Octave 4.0.3, Wed Sep 06 17:33:11 2017 EDT <peter@aristotle>
+# name: kon
+# type: global matrix
+# rows: 1
+# columns: 5
+ 0.4 0.4 6.1 0.2 0.5
+
+
+# name: Dc
+# type: global scalar
+1
+
+
+# name: h0
+# type: global scalar
+1000000000
+
+

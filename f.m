@@ -1,16 +1,17 @@
-function xdot = f(x,t)
+function xdot = f(x,t,kon)
 # SNR = [-10:5:30]; %in Db
   snr = 130;
+  global kon;
+  global Dc;
+  global h0;
 
-  Dc = 1.0;
-  h0 = 10^9;
   p = 0.4; # Population Density of Ho
-  k1 = 0.4;
-#k2 = awgn(0.4,snr,'measured');
-  k2 = 0.4;
-  k3 = 6.1;
-  k4 = 0.2;
-  kg = 0.5;
+
+  k1 = kon(1);
+  k2 = kon(2);
+  k3 = kon(3);
+  k4 = kon(4);
+  kg = kon(5);
 
   inhibit = 0.9;
 % Each successive growth rate (slightly) inhibited

@@ -4,6 +4,10 @@ host2color = [0.00 0.75 0.00];  % Green
 host3color = [0.75 0.00 0.00];  % Red
 phagecolor = [0.75 0.00 0.75];  % Purple
 zcolor =     [0.00 0.25 0.75];  % Carolina Blue
+global kon;
+global Dc;
+global h0;
+ load ES_params;  % Loads the global variables
 
 %  Initial conditions x(1)=1000 and x(2..5)=0 on [0,20] with 200 points:
 x = lsode("f", [1000;0;0;0;0], (t = linspace (0,20,200)' ));
