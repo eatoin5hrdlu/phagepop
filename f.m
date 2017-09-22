@@ -1,27 +1,46 @@
-function xdot = f(x,t,kon)
-# SNR = [-10:5:30]; %in Db
-  snr = 130;
-  global kon;
-  global Dc;
-  global h0;
+% LAGOON MODEL:  FOUR COUPLED DIFFERENTIAL EQUATIONS:
+%
+% UNINFECTED  -> ADSORBED  -> PRODUCTIVE  ->  PHAGE
+%  (cells)        (cells)      (cells)      (particles)
 
-  p = 0.4; # Population Density of Ho
+function xdot = f(x,t)
+  global kg ad ec pp fr h0 vol;
+  pm = 1; % This is what makes the g-model different (from f)
 
-  k1 = kon(1);
-  k2 = kon(2);
-  k3 = kon(3);
-  k4 = kon(4);
-  kg = kon(5);
+  lkg = delta(kg, 0.02*pm); % Local (varied) normal E. coli growth constant
+  lad = delta(ad, 0.1*pm);  % Local (varied) adsorption coefficient
+  lec = delta(ec, 0.1*pm);  % Local (varied) rate exiting eclipse
+  lpp = delta(pp, 0.05*pm);  % Local (varied) phage production per cell
+  dc = fr; % new variable so we could model dynamic modification
 
+% Inhibited growth rates for subsequent stages of E. coli
+% Ultimately this should be measured for given strains of E. coli and M13
   inhibit = 0.9;
-% Each successive growth rate (slightly) inhibited
-  kgp = kg*inhibit;
+% Infected cells have inhibited growth rate relative to healthy host cells
+  kgp = lkg*inhibit;
+% Productive cells have inhibited growth rate relative to merely infected cells
   kgpp = kgp*inhibit;
-  kgppp = kgpp*inhibit;
 
-  xdot(1) = Dc*h0 - Dc*x(1) - k1*p*x(1) + kg*x(1);
-  xdot(2) = -Dc*x(2) + k1*x(1) + kgp*x(2) - k2*x(2);
-  xdot(3) = -Dc*x(3) + kgpp*x(3) + k2*x(2) - k4*x(3);
-  xdot(4) = -Dc*x(4) + kgppp*x(4) + k4*x(3);
-  xdot(5) = -Dc*x(5) - k1*p*x(1) + k3*x(3);
-  endfunction
+% INFLOW = Flow rate in volumes/hour * concentration cells/ML * volume mL = number of cells
+% Growth = Number of Cells * Growth constant (doubling time?)             = number of cells
+% Infection = (Total Number of Cells * Total Number of Phage * Adsorption Constant)/total Volume = Fraction Infected
+
+% Adsorption constant is in mL/min so X60 for hours
+  
+% (1) Uninfected Host flowing in at Dilution Constant * Cells/mL
+%           + INFLOW       +   GROWTH   - OUTFLOW  - TRANSFORMATION
+  xdot(1) =   dc*h0*vol    +  lkg*x(1)  - dc*x(1)  - (lad*60*x(1)*x(4))/vol;
+
+% (2) Infected Host (previous TRANSFORMED is this equation's INFLOW)
+  xdot(2) =  (lad*60*x(1)*x(4))/vol +  kgp*x(2)  - dc*x(2)  -  lec*x(2);
+
+% (3) Productive Host: INFLOW from Eclipse state, plus growth, minus dilution 
+
+  xdot(3) =  lec*x(2)      + kgpp*x(3)  - dc*x(3);  % No transformation output
+  
+% (4) Phage Production:  No Growth      - OUTFLOW   % No transformation output
+
+  xdot(4) =  lpp*x(3)                   - dc*x(4);
+  
+endfunction
+

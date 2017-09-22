@@ -1,0 +1,40 @@
+
+# name: kg
+# type: global scalar
+1.5
+
+# name: ad
+# type: global scalar
+3.0e-11
+
+# name: ec
+# type: global scalar
+0.0005
+
+# name: pp
+# type: global scalar
+100
+
+# name: p0
+# type: global scalar
+1000000000
+
+# name: fr
+# type: global scalar
+1
+
+# name: h0
+# type: global scalar
+100000000000
+
+# name: vol
+# type: global scalar
+40
+
+# name: dur
+# type: global scalar
+10
+
+# name: lsl
+# type: global scalar
+0
