@@ -1,0 +1,13 @@
+% The model is a set of differential equations representing the populations
+% host0 is uninfected host
+% hosta is host with adsorbed phage
+% hostp is producing phage
+% phage  is total phage population
+% phagee is the emerging population of a selected mutation
+
+odes([
+ host0:'h0*fr*vol/60 +(log(2)/lkg)*x(1)-fr*x(1)/60-(lad/vol)*x(4)*x(1)',
+ hosta:'(lad/vol)*x(4)*x(1)+(log(2)/kgp)*x(2)-fr*x(2)/60 - x(2)/lec',
+ hostp:'x(2)/lec   + (log(2)/kgpp)*x(3)  - fr*x(3)/60',
+ phage:'lpp*x(3)/60                - fr*x(4)/60',
+ phagee:'lpfraction*x(4)/60                - fr*x(5)/60']).
