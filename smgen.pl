@@ -1,92 +1,103 @@
 #!/usr/bin/swipl -s
-% Generate octave/python(python) solver for equations in file "eqn"
+% Generate matlab/python(python) solver for equations in file "eqn"
 % ./smgen.pl eqn
 
 :- use_module(library(lists), [ nth0/3 ]).
 
-suffix(octave, '.m').
 suffix(matlab, '.m').
 suffix(python, '.py').
 
-% Compute +- parameter values for range of solutions
-deltaValue(octave, Sign, VN:PC, ['l',VN,' = delta(',VN,', ',Sign,PC,'*pm);']).
-deltaValue(python, Sign, VN:PC, ['\tl',VN,' = delta(',VN,', ',Sign,PC,'*pm);']).
-
-gencode(Language, Name, _Spec, _Sign) -->
-    declaration(Language, Name),
-    assignments(Language),
-    diffeq(Language).
+gencode(Language, Name, Sign) -->
+    { preamble(Pre),
+      variation(Var),
+      odes(ODEs),
+      setof(V,freevars([Pre,Var,ODEs],V),AllVars), % all variables
+      setof(Lh, Eq^member(Lh=Eq,ODEs), LHS),       % minus ODE names
+      ord_subtract(AllVars, LHS, Vars),trace },
+      declare(Language, Name, Vars),                % Declaration
+      findall(S, (member(M,Pre),S=..[Language,M])), % Assignments
+      modulation(Var, Language, Sign),              % Variation
+      diffeq(Language, ODEs).                       % Equations
 
 genmodels(Language) :-
-    Spec = [kg:0.02, ad:0.1, ec:0.1, pp:0.05],
-    writecode(Language, Spec, f2, ''),
-    writecode(Language, Spec, g2, '-').
+    gencode(Language, f2, '', PCode, []),
+    writecode(Language, f2, PCode),
+    gencode(Language, g2, '-', NCode, []),
+    writecode(Language, g2, NCode).
 
-flat_format([])        --> [].
-flat_format([H|T])     --> flat_format(H), flat_format(T).
-flat_format(octave(A)) --> !, [A, ';'], newline.
-flat_format(python(Tabs, A)) --> !, tabs(Tabs), [A], newline.
+flat_format([])        --> !, [].
+flat_format([H|T])     --> !, flat_format(H), flat_format(T).
+flat_format(matlab(A)) --> !, space, [A, ';'], newline.
+flat_format(python(A)) --> !, tab, [A], newline.
 flat_format(A) --> [A].
 
-tabs(N) --> { N>0, !, NN is N-1}, ['\t'], tabs(NN).
-tabs(0) --> [].
-
-writecode(Language, Spec, Name, Sign) :-
-    gencode(Language, Name, Spec, Sign, Code, []),
+writecode(Language, Name, RawCode) :-
+    flat_format(RawCode, Code,[]),
     suffix(Language, Suffix),
     concat_atom([Name, Suffix],Filename),
     tell(Filename),
-    flat_format(Code, FlatCode,[]),
-    maplist(write, FlatCode),
+    maplist(write, Code),
     told.
 
-% ASSIGNMENT STATEMENT SYNTAX
-assignments(Language) --> { preamble(Pre) }, stmt(Pre,Language).
+% +- Modulation of specified variables to model range of values
+% E.g. Create local version (lkg) of var (kg) with +- delta
+modulation([], _, _)               --> [].
+modulation([V|Vs], Language, Sign) -->
+    delta(Language, Sign, V), newline,
+    modulation(Vs, Language, Sign).
 
-stmt([],    _)      --> !.
-stmt([H|T], octave) --> [ octave(H) ], stmt(T, octave).
-stmt([H|T], python) --> [ python(1, H) ], stmt(T, python).
+delta(matlab, Sign, V) --> space, delta(Sign, V), [';'].
+delta(python, Sign, V) --> tab, delta(Sign, V).
+% Language Independent
+delta(Sign, VN:PC) --> ['loc',VN,' = delta(',VN,', ',Sign,PC,'*pm)'].
 
-# DIFFERENTIAL EQUATION SYNTAX
-diffeq(octave) --> diffeq(matlab).
 
-diffeq(matlab) -->  { odes(Stmts),
-		      findall(['xdot(',I,')= ', octave(S)], nth0(I,Stmts,_=S), ODEs) },
-		    ODEs.
+% DIFFERENTIAL EQUATION SYNTAX
+diffeq(matlab, Stmts) -->
+    findall(['    xdot(',I,') = ', matlab(S)], nth0(I,Stmts,_=S)).
 
-diffeq(python) --> ['\t', return, '[' ], newline,
-		   { odes(Stmts),
-		     findall([S,',\n'], member(_=S,Stmts), ODEs) },
-		   ODEs, [']'], newline.
+diffeq(python, Stmts) -->   % return [ Expr,<nl> Expr,<nl> ... ]
+    ['\t', return, ' [' ], newline,
+    { findall(S, member(_=S,Stmts), List) },
+    frame_list('    ',List,',\n'),
+    [']'], newline.
 
-run :- current_prolog_flag(argv,[A|_]),
-       consult(A),
-       genmodels(octave),
-       genmodels(python).
+% DIFFERENTIAL EQUATION SYNTAX
 
-    
+main :- current_prolog_flag(argv,[A|_]),
+	consult(A),
+	genmodels(matlab),
+	genmodels(python),
+	trace.
+
 freevars([],_)  :- !,fail.
-freevars(N,_)   :- number(N),!,fail.
-freevars(A,A)   :- atomic(A),!.
-freevars(Term,V):- Term =.. [_|Args], member(A,Args), freevars(A,V).
+freevars(N,_)   :- number(N), !, fail.
+freevars(A,B)   :- atomic(A), !, not_local(A,B).
+freevars(Term,V):- Term =.. [_|Args],
+		   member(A, Args),
+		   freevars(A, V).
     
-declaration(Language, Name) -->
-    { preamble(P),
-      setof(V,freevars(P,V),Vs) }, 
-    declare(Language, Name, Vs).
+not_local(LVar,Var) :- atom_concat(loc,Var,LVar),!.
+not_local(Var, Var).
     
 newline --> ['\n'].
+space   --> ['    '].
+tab     --> ['\t'].
 
-declare(octave, Name, List) --> declare(matlab, Name, List).
+tabs(0) --> [].
+tabs(N) --> { N>0, NN is N-1}, tab, tabs(NN).
 
-declare(matlab, Name, List) --> ['function xdot = ', Name, '('], xandt, newline,
-                                [global, ' '], dvarlist(matlab, List), [';'], newline.
+declare(matlab, Name, List) -->
+    ['function xdot = ', Name, '('], xandt, newline,
+    [global, ' '], comma_list(List), [';'], newline.
 
-declare(python, Name, List) --> [def, ' ', Name, '('], dvarlist(python, List), xandt, [':'], newline.
+declare(python, Name, List) -->
+    [def, ' ', Name, '('], comma_list(List),[','],xandt, [':'], newline.
 
 xandt --> ['x', ',', 't', ')'].
 
-dvarlist(_,           []) --> [].
-dvarlist(matlab,     [H]) --> [H], !.
-dvarlist(Language, [H|T]) --> [H, ', '], dvarlist(Language, T).
+comma_list(List) --> frame_list(' ',List,',').
+
+frame_list(Pre,[H1,H2|T],Post) --> [Pre,H1,Post],!,frame_list(Pre,[H2|T],Post).
+frame_list(Pre,L,_) --> [Pre], L.
 
