@@ -1,16 +1,32 @@
 # phagepop
 
+How to run new code generater
+To generate python(odespy) and octave/matlab models from the file "eqn"
 
+> swipl eqn
+?- [smgen].
+?- run.
+?- halt.
+
+--------Octave hand written version (fully debugged)------------
 Phagestat population dynamic model for EvoStat:
 a realization of Husimi's CellStat (PhageStat).
 
-modrun.m     - solves the differential equations (in f.m) and plots them.
+The main program is modrun, called with "octave --persist modrun.m"
+
+modrun.m     - solves the differential equations in file f.m,
+               plots them using the fill code in jpfill.m,
+	       with the colors defined in colortable.m
+
 jpfill.m     - colors between two curves to showing bounds of activity/population levels in our model.
+
 colortable.m - a utility to show the default colors for plot lines.
 
 f.m          -  models the system of five differential equations from:
 
-Husimi:
+selection.m  -  A particular selection mechanism model.
+
+  Husimi
   "Cellstat—A continuous culture system of a bacteriophage for the study of
    the mutationnrate and the selection process at the DNA level"
 
