@@ -4,8 +4,11 @@ How to run new code generater
 To generate python(odespy) and octave/matlab models from the file "eqn"
 
 > swipl eqn
+
 ?- [smgen].
+
 ?- run.
+
 ?- halt.
 
 --------Octave hand written version (fully debugged)------------
