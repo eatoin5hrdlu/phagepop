@@ -10,18 +10,18 @@
 
 preamble([
   pm = 1,
-  lkg = delta(kg, 0.02*pm),
-  lad = delta(ad, 0.1*pm),
-  lec = delta(ec, 0.1*pm),
-  lpp = delta(pp, 0.05*pm),
   inhibit = 1.1,
-  kgp = lkg*inhibit,
+  kgp = lockg*inhibit,
   kgpp = kgp*inhibit ]).
 
 odes([
- host0 = h0*fr*vol/60 + (log(2)/lkg)*x(1)-fr*x(1)/60-(lad/vol)*x(4)*x(1),
- hosta = (lad/vol)*x(4)*x(1)+(log(2)/kgp)*x(2)-fr*x(2)/60 - x(2)/lec,
- hostp = x(2)/lec   + (log(2)/kgpp)*x(3)  - fr*x(3)/60,
- phage = lpp*x(3)/60                - fr*x(4)/60,
- phagee= lpfraction*x(4)/60                - fr*x(5)/60]).
+ host0 = h0*fr*vol/60 + (log(2)/lockg)*x(1)-fr*x(1)/60-(locad/vol)*x(4)*x(1),
+ hosta = (locad/vol)*x(4)*x(1)+(log(2)/kgp)*x(2)-fr*x(2)/60 - x(2)/locec,
+ hostp = x(2)/locec   + (log(2)/kgpp)*x(3)  - fr*x(3)/60,
+ phage = locpp*x(3)/60                - fr*x(4)/60,
+ phagee= locpfraction*x(4)/60         - fr*x(5)/60]).
  
+% +- Variation of specified variables
+% E.g. Create local version (lkg) of var (kg) with +- delta
+%              2%      10%     10%      5%
+variation([kg:0.02, ad:0.1, ec:0.1, pp:0.05]).
