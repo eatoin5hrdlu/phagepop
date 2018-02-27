@@ -13,7 +13,7 @@ gencode(Language, Name, Sign) -->
       odes(ODEs),
       setof(V,freevars([Pre,Var,ODEs],V),AllVars), % all variables
       setof(Lh, Eq^member(Lh=Eq,ODEs), LHS),       % minus ODE names
-      ord_subtract(AllVars, LHS, Vars),trace },
+      ord_subtract(AllVars, LHS, Vars) },
       declare(Language, Name, Vars),                % Declaration
       findall(S, (member(M,Pre),S=..[Language,M])), % Assignments
       modulation(Var, Language, Sign),              % Variation
@@ -67,8 +67,7 @@ diffeq(python, Stmts) -->   % return [ Expr,<nl> Expr,<nl> ... ]
 main :- current_prolog_flag(argv,[A|_]),
 	consult(A),
 	genmodels(matlab),
-	genmodels(python),
-	trace.
+	genmodels(python).
 
 freevars([],_)  :- !,fail.
 freevars(N,_)   :- number(N), !, fail.
