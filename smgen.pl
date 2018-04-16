@@ -13,10 +13,10 @@ gencode(Language, Name, Sign) -->
       odes(ODEs),
       setof(V,freevars([Pre,Var,ODEs],V),AllVars), % all variables
       setof(Lh, Eq^member(Lh=Eq,ODEs), LHS),       % minus ODE names
-      ord_subtract(AllVars, LHS, Vars),trace },
+      ord_subtract(AllVars, LHS, Vars) },
       declare(Language, Name, Vars),                % Declaration
-      findall(S, (member(M,Pre),S=..[Language,M])), % Assignments
       modulation(Var, Language, Sign),              % Variation
+      findall(S, (member(M,Pre),S=..[Language,M])), % Assignments
       diffeq(Language, ODEs).                       % Equations
 
 genmodels(Language) :-
@@ -54,7 +54,8 @@ delta(Sign, VN:PC) --> ['loc',VN,' = delta(',VN,', ',Sign,PC,'*pm)'].
 
 % DIFFERENTIAL EQUATION SYNTAX
 diffeq(matlab, Stmts) -->
-    findall(['    xdot(',I,') = ', matlab(S)], nth0(I,Stmts,_=S)).
+    findall(['    xdot(',IP1,') = ', matlab(S)],
+	    (nth0(I,Stmts,_=S),IP1 is I+1)).
 
 diffeq(python, Stmts) -->   % return [ Expr,<nl> Expr,<nl> ... ]
     ['\t', return, ' [' ], newline,
@@ -67,8 +68,7 @@ diffeq(python, Stmts) -->   % return [ Expr,<nl> Expr,<nl> ... ]
 main :- current_prolog_flag(argv,[A|_]),
 	consult(A),
 	genmodels(matlab),
-	genmodels(python),
-	trace.
+	genmodels(python).
 
 freevars([],_)  :- !,fail.
 freevars(N,_)   :- number(N), !, fail.
@@ -89,15 +89,21 @@ tabs(N) --> { N>0, NN is N-1}, tab, tabs(NN).
 
 declare(matlab, Name, List) -->
     ['function xdot = ', Name, '('], xandt, newline,
-    [global, ' '], comma_list(List), [';'], newline.
+    [global, ' '], list(List,' '), [';'], newline.
 
 declare(python, Name, List) -->
-    [def, ' ', Name, '('], comma_list(List),[','],xandt, [':'], newline.
+    [def, ' ', Name, '('], list(List,','),[','],xandt, [':'], newline.
 
 xandt --> ['x', ',', 't', ')'].
 
-comma_list(List) --> frame_list(' ',List,',').
+list(List,Char) --> frame_list(' ',List,Char).
 
 frame_list(Pre,[H1,H2|T],Post) --> [Pre,H1,Post],!,frame_list(Pre,[H2|T],Post).
 frame_list(Pre,L,_) --> [Pre], L.
 
+
+increment(x(N), x(NP1)) :- !, NP1 is N+1.
+increment(Term, NewTerm) :-
+    Term =.. [F0|Args],
+    maplist(increment, Args, NewArgs),
+    NewTerm =.. [F0|NewArgs].
